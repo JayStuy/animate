@@ -413,5 +413,5 @@ void my_main( int polygons ) {
 
     free_stack( s );
     free_matrix( tmp );
-    
+  }    
 }
