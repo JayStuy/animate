@@ -406,10 +406,8 @@ void my_main( int polygons ) {
       }
     }
   
-    if( num_frames > 1 ) {
-      sprintf( frame_name, "%s/%s03d", name, name, n );
-      save_extension( t, frame_name );
-    }
+  sprintf(frame_name, "./anim/%s%03d.png", name, n);
+	save_extension(t, frame_name);
 
     free_stack( s );
     free_matrix( tmp );
