@@ -109,8 +109,8 @@ void first_pass() {
     }
   }
   if (frame && !basename) {
-    printf( "You have frames but no basename. A basename named Mate has been provided for you\n" );
-    strcpy( name, "Mate" );
+    printf( "You have frames but no basename. A basename named anim has been provided for you\n" );
+    strcpy( name, "anim" );
   }
 }
 
@@ -139,58 +139,75 @@ void first_pass() {
 struct vary_node ** second_pass() {
   int i; int j; int k; int l;
   int kdef;
-  struct vary_node **knobs = malloc( sizeof( struct vary_node *) * num_frames );
+  struct vary_node **knobs = malloc(sizeof(struct vary_node *) * num_frames);
   struct vary_node *new; struct vary_node *cur;
-  for( i=0; i < lastop; i++ ) {
-    if( op[i].opcode == VARY ) {
+  for(i=0;i<lastop;i++){
+    if(op[i].opcode == VARY){
       char *kname = op[i].op.vary.p->name;
       double sf = op[i].op.vary.start_frame;
       double ef = op[i].op.vary.end_frame;
       double sv = op[i].op.vary.start_val;
       double ev = op[i].op.vary.end_val;
-      double step = ( ev - sv )/( num_frames-1 );
-      for( j=sf; j <= ef; j++ ) {
-        cur = knobs[j];
-        while( cur != NULL && cur->next != NULL ) {
-          if( strcmp(cur->name, kname ) == 0 ) {
-            cur->value = sv + step*(j-sf);
-            break;
-          }
-          cur = cur->next;
-        }
+      double step = (ev - sv)/(num_frames-1);
+
+      if( ef > num_frames || sf > ef ){
+        printf("Invalid Frame Range\n");
+        exit(0);
       }
-      for( k=0; k < sf; k++ ) {
-        cur = knobs[k];
+      //printf("kname: %s, sv: %lf, ev: %lf, step: %lf\n", kname, sv,ev,step);
+      for(j=sf;j<=ef;j++){
+        cur = knobs[j];
         kdef = 0;
-        while( cur != NULL && cur->next != NULL ) {
-          if( strcmp( cur->name, kname ) == 0 ) {
+        while(cur != NULL /*&& cur->next != NULL*/){
+          if( strcmp(cur->name, kname) == 0 ){
+            cur->value = sv + step*(j-sf);
             kdef = 1;
             break;
           }
           cur = cur->next;
         }
         if( !kdef ){
-          new = malloc( sizeof( struct vary_node ));
-          strcpy( new->name, kname );
-          new->value = sv;
-          new->next = knobs[k];
+          new = malloc(sizeof(struct vary_node));
+          strcpy(new->name,kname);
+          new->value = sv + step*(j-sf);
+          new->next = knobs[j];
+          knobs[j] = new;
         }
       }
-      for( l=ef+1; l < num_frames; l++ ) {
-        cur = knobs[l];
+      for(k=0;k<sf;k++){
+        cur = knobs[k];
         kdef = 0;
-        while( cur != NULL && cur->next != NULL ) {
-          if( strcmp( cur->name, kname ) == 0 ) {
+        while(cur != NULL /*&& cur->next != NULL*/){
+          if( strcmp(cur->name, kname) == 0 ){
             kdef = 1;
             break;
           }
           cur = cur->next;
         }
-        if( !kdef ) {
-          new = malloc( sizeof( struct vary_node ));
-          strcpy( new->name, kname );
+        if( !kdef ){
+          new = malloc(sizeof(struct vary_node));
+          strcpy(new->name,kname);
+          new->value = sv;
+          new->next = knobs[k];
+          knobs[k] = new;
+        }
+      }
+      for(l=ef+1;l<num_frames;l++){
+        cur = knobs[l];
+        kdef = 0;
+        while(cur != NULL /*&& cur->next != NULL*/){
+          if( strcmp(cur->name, kname) == 0 ){
+            kdef = 1;
+            break;
+          }
+          cur = cur->next;
+        }
+        if( !kdef ){
+          new = malloc(sizeof(struct vary_node));
+          strcpy(new->name,kname);
           new->value = ev;
           new->next = knobs[l];
+          knobs[l] = new;
         }
       }
     }
@@ -256,7 +273,6 @@ void print_knobs() {
   jdyrlandweaver
   ====================*/
 void my_main( int polygons ) {
-
   int i, n, j;
   double step;
   double xval, yval, zval, knob_value;
