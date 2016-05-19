@@ -16,7 +16,7 @@ box flight 0 0 0 100 100 100
 pop
 light sun 200 200 200 85 10 20
 light ambience 0 0 0 85 0 0
-basename scriptZero
+basename anim
 frames 30
 vary knob 0 29 0 1
 vary knob2 0 29 .5 2
